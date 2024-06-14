@@ -1,0 +1,17 @@
+FROM t1-services:latest as BUILD
+
+FROM openjdk:21-ea-21-jdk-slim
+
+ENV WORKDIR=/opt/app
+WORKDIR $WORKDIR
+ENV JAR_FILE=$WORKDIR/kafka-consumer.jar
+
+EXPOSE 8082
+
+COPY --from=BUILD /usr/app/kafka-consumer/target/kafka-consumer.jar $JAR_FILE
+
+ENTRYPOINT java -jar -Dspring.profiles.active=production ${JAR_FILE}
+
+
+
+
