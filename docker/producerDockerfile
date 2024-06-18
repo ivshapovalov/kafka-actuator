@@ -1,4 +1,4 @@
-FROM t1-services:latest as BUILD
+FROM t1-kafka-actuator-parent:latest as BUILD
 
 FROM openjdk:21-ea-21-jdk-slim
 ENV WORKDIR=/opt/app
@@ -9,6 +9,6 @@ COPY --from=BUILD /usr/app/kafka-producer/target/kafka-producer.jar $JAR_FILE
 
 ENV TZ="Europe/London"
 
-EXPOSE 8081
+EXPOSE 8082
 
 ENTRYPOINT java -jar -Dspring.profiles.active=production ${JAR_FILE}

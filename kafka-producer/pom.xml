@@ -15,6 +15,12 @@
 	<properties>
 		<mainClass>com.example.kafkaproducer.KafkaProducerApplication</mainClass>
 	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+	</dependencies>
 	<build>
 		<finalName>kafka-producer</finalName>
 		<plugins>
@@ -23,6 +29,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.12.1</version>
 				<configuration>
+					<parameters>true</parameters>
 					<source>21</source>
 					<target>21</target>
 				</configuration>

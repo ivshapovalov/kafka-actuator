@@ -1,0 +1,47 @@
+app:
+  kafka:
+    topic: metrics-topic
+    topic-dlt: metrics-topic.DLT
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+server:
+  port: 8082
+
+spring:
+  application:
+    name: t1-kafka-producer
+  profiles:
+    group:
+      default:
+        - "dev"
+      production:
+        - "production"
+    active: default
+  kafka:
+    bootstrap-servers: localhost:39092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json:
+          add.type.headers: false
+
+logging:
+  level:
+    com:
+      example:
+        kafkaproducer: DEBUG
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: production
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}

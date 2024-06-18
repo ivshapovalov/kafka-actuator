@@ -1,4 +1,4 @@
-FROM t1-services:latest as BUILD
+FROM t1-kafka-actuator-parent:latest as BUILD
 
 FROM openjdk:21-ea-21-jdk-slim
 
@@ -6,7 +6,7 @@ ENV WORKDIR=/opt/app
 WORKDIR $WORKDIR
 ENV JAR_FILE=$WORKDIR/kafka-consumer.jar
 
-EXPOSE 8082
+EXPOSE 8083
 
 COPY --from=BUILD /usr/app/kafka-consumer/target/kafka-consumer.jar $JAR_FILE
 

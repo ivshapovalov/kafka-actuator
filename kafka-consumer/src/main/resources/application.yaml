@@ -1,0 +1,85 @@
+app:
+  kafka:
+    topic: metrics-topic
+    topic-dlt: metrics-topic.DLT
+
+server:
+  port: 8083
+
+spring:
+  application:
+    name: t1-kafka-consumer
+  kafka:
+    bootstrap-servers: localhost:39092
+    consumer:
+      group-id: metrics-consumer-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json:
+          trusted.packages: '*'
+          use.type.headers: false
+          value.default.type: com.example.kafkaconsumer.dto.MetricsDto
+  output:
+    ansi:
+      enabled: ALWAYS
+  profiles:
+    group:
+      default:
+        - "dev"
+      production:
+        - "production"
+    active: default
+  sql:
+    init:
+      mode: always
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  mvc:
+    format:
+      date-time: yyyy-MM-dd'T'HH:mm:ss.SSSX
+
+logging:
+  level:
+    com:
+      example:
+        kafkaconsumer: DEBUG
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/t1-kafka-db
+    username: postgres
+    password: postgres
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: production
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_SERVER}:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}

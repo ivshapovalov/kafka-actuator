@@ -1,0 +1,91 @@
+name: t1-kafka-actuator
+version: '3.9'
+services:
+  t1-kafka-consumer:
+    image: t1-kafka-consumer
+    container_name: t1-kafka-consumer
+    build:
+      context: .
+      dockerfile: consumerDockerfile
+    restart: no
+    environment:
+      APP_LOGGING_LEVEL: DEBUG
+      POSTGRES_SERVER: t1-kafka-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      KAFKA_HOST: t1-kafka
+      KAFKA_PORT: 9092
+    depends_on:
+      - t1-kafka
+      - t1-kafka-db
+    ports:
+      - "8083:8083"
+    networks:
+      - t1-kafka-net
+
+  t1-kafka-producer:
+    image: t1-kafka-producer
+    container_name: t1-kafka-producer
+    build:
+      context: .
+      dockerfile: producerDockerfile
+    restart: no
+    environment:
+      APP_LOGGING_LEVEL: DEBUG
+      KAFKA_HOST: t1-kafka
+      KAFKA_PORT: 9092
+    depends_on:
+      - t1-kafka
+    ports:
+      - "8082:8082"
+    networks:
+      - t1-kafka-net
+
+  t1-zookeeper:
+    container_name: t1-zookeeper
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "39181:2181"
+    networks:
+      - t1-kafka-net
+
+  t1-kafka:
+    container_name: t1-kafka
+    image: confluentinc/cp-kafka:7.4.0
+    restart: always
+    depends_on:
+      - t1-zookeeper
+    ports:
+      - "39092:39093"
+    environment:
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_PROTOCOL_NAME: INTERNAL
+      KAFKA_ADVERTISED_PROTOCOL_NAME: OUTSIDE
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 't1-zookeeper:2181'
+      KAFKA_LISTENERS: INTERNAL://:9092,OUTSIDE://:39093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://t1-kafka:9092,OUTSIDE://127.0.0.1:39092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - t1-kafka-net
+
+  t1-kafka-db:
+    restart: always
+    container_name: t1-kafka-db
+    image: postgres:15.2-alpine
+    ports:
+      - "35432:5432"
+    environment:
+      POSTGRES_PASSWORD: password
+    networks:
+      - t1-kafka-net
+
+networks:
+  t1-kafka-net:
+    driver: bridge
